@@ -1,11 +1,9 @@
 "use client";
-
 import React, { useState, FormEvent, ChangeEvent, useEffect, use } from "react";
 import ollama, { ChatRequest, Ollama } from "ollama/browser";
-import Navbar from "@/app/Navbar";
 
 interface IMessage {
-  sender: "user" | "ai";
+  sender: string;
   text: string;
 }
 
@@ -35,13 +33,13 @@ const Home: React.FC = () => {
     history.model = modelName;
   }, [modelName]);
 
-  const handleUserSubmit = async (event: FormEvent<HTMLFormElement>): void => {
+  const handleUserSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const userMessage = { sender: "user", text: input };
     setInput("");
     setMessages([...messages, userMessage]);
     history.messages?.push({ role: "user", content: input });
-    const aiResponse = await olclient.chat(history);
+    const aiResponse = await olclient.chat({options: history.options, messages: history.messages, model: history.model, stream: false});
     history.messages?.push(aiResponse.message);
     const aiMessage = { sender: "ai", text: aiResponse.message.content };
 
@@ -170,7 +168,7 @@ const Home: React.FC = () => {
                     type="number"
                     value={limit}
                     className="bg-slate-700 border-b-2 border-gray-600"
-                    onChange={(e) => setLimit(e.target.value)}
+                    onChange={(e) => setLimit(parseInt(e.target.value))}
                     placeholder="Limit"
                   />
                 </div>
